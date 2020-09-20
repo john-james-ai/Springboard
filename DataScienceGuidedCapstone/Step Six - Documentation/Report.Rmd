@@ -1,0 +1,271 @@
+---
+title: "Big Mountain Resort: Value Creation and Value Capture Strategy"
+author: "John James john.james@nov8.ai"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    theme: flatly
+    highlight: zenburn
+    css: "style.css"    
+---
+
+```{r libraries, echo=FALSE, cache=FALSE, warning=FALSE, message=FALSE, results='hide'}
+library(dplyr)
+library(extrafont)
+library(formattable)
+library(htmltools)
+library(kableExtra)
+library(kfigr)
+library(knitr)
+library(plotly)
+library(reticulate)
+library(rmarkdown)
+library(tufte)
+use_condaenv("sb")
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force=TRUE)
+```
+
+
+
+```{r setup, echo=FALSE, cache=FALSE, warning=FALSE, message=FALSE}
+figures <- '/figures/'
+options(knitr.table.format = "html")
+options(max.print=100, scipen=999, width = 800)
+knitr::opts_chunk$set(echo=FALSE,
+	             cache=FALSE,
+               prompt=FALSE,
+	             eval = TRUE,
+               tidy=TRUE,
+               fig.height = 8,
+               fig.width = 20,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+knitr::opts_knit$set(width=100, figr.prefix = T, figr.link = T)
+knitr::opts_chunk$set(fig.path = figures)
+knitr::knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=",")
+})
+```
+
+```{python imports}
+import numpy as np
+import pandas as pd
+import matplotlib
+import matplotlib.pyplot as plt
+```
+
+```{python syspath}
+import inspect
+import os
+import sys
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = 'C:/Users/John/anaconda3/envs/sb/Library/plugins/platforms'
+# Add home directory to path
+home = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+sys.path.append(home)
+```
+```{python module, include=FALSE, code=readLines('./Report.py')}
+```
+
+## Big Mountain Current Situation         
+Big Mountain Ski Resort offers spectacular views of Glacier National Park and Flathead National Forest, access to 105 trails, a vertical drop of 2353 feet, and over 3000 square feet of skiable terrain to some 350,000 visitors per year.  
+
+The current asset base includes 2 T-bars, a magic carpet for novice skiers and 12 lifts, one of which was recently added to increase the distribution of visitors across the mountain resulting in a net annual operating cost increase of $1.54M.
+
+Big Mountain's is currently evaluating how it creates and captures value vis-a-vis its investment, pricing, and operational strategies. Currently, Big Mountain charges an adult price of $81 per weekend day. This current pricing regime is to charge a premium over the average price of resorts in their market segment, but that approach is problematic in several respects. First, it provides no insight into what constitutes value from the perspective of the customer. Second, it doesn't reflect how and to what degree the resort delivers the value, and finally, the strategy doesn't maximize value capture for the company. Consequently, investment and cost-cutting strategies cannot be considered on the basis of valuable market and customer data.
+
+Big Mountain Ski Resort has engaged outside council to: 
+
+1. illuminate the aspects of Big Mountain's facilities that have the greatest (and least) influence on price.    
+2. propose a pricing strategy that maximizes revenue for the company and value for the customer, and           
+3. provide data-driven recommendations vis-a-vis three shortlisted scenarios that the company is considering.
+
+The analysis should help address questions such as:
+
+1. How do we maximize price based upon the facilities currently in place?      
+2. What investment strategies would create the most value for the company in the short and long run?            
+3. How costs be cut without reducing value to the customer?     
+
+This market and customer data will yield better investment and cost-cutting decisions, optimize value creation for the customer, and maximize value capture for Big Mountain! 
+
+## Recommendation to Big Mountain: Add the Run!
+### Price Recommendation
+The models trained on nearly 300 ski resorts across the country indicate that Big Mountain's current facilities could support a price of \$94.22 per adult, per weekend day - an increase of 16%, corresponding to an annual revenue increase north of \$4.6 million annually.
+
+### Scenario Recommendation
+Four scenarios are being considered by Big Mountain executives:
+
+1. Permanently closing down up to 10 of the least used runs. This doesn't impact any other resort statistics.   
+2. Increase the vertical drop by adding a run to a point 150 feet lower down but requiring the installation of an additional chair lift to bring skiers back up, without additional snow making coverage            
+3. Same as number 2, but adding 2 acres of snow making cover             
+4. Increase the longest run by 0.2 mile to boast 3.5 miles length, requiring an additional snow making coverage of 4 acres.
+
+Of the four options being considered, adding the additional run and chair lift would support a ticket price increase of \$1.99. With 350,000 visitors per year, this would correspond with an approximate \$3,5 million revenue increase per year. Adding the additional 2 acres of snow making had no incremental effect on price and increasing the longest run by .2 miles had no absolute impact on price.
+
+Closing down up to 10 of the least used runs would have a non-trivial impact on price. 
+
+```{python scenario_1, echo=FALSE, warnings=F, message=F}
+scenario_1_chart()
+plt.show()
+```
+<center>
+ `r kfigr::figr(label = "scenario_1", prefix = TRUE, link = TRUE, type="Figure")`: Big Mountain Resort Scenario #1 Price and Revenue Impact
+</center>
+
+## What Matters Most to Customers        
+
+To assess the facilities that had the greatest influence on price, a feature correlation analysis and two machine learning models were developed. The four features having the greatest influence in price were:
+
+- fastQuads           
+- Runs      
+- Snow Making_ac           
+- vertical_drop    
+
+Other features with smaller but statistically significant impact on price include:     
+
+- total_chairs         
+- LongestRun_mi       
+- trams        
+- SkiableTerrain_ac          
+
+The following summarizes the results of simple linear regressions performed on the top four features.
+
+```{python price_effect, echo=FALSE, warnings=F, message=F}
+detail, summary = regression()
+```
+<center>
+```{r}
+df <- py$summary
+df$Revenue <- currency(df$Revenue)
+col_names <- c('Expected Adult Weekend Ticket<br/>Price Increase per Unit',
+               'Lower Range', 'Upper Range', 'Expected Annual Revenue <br/> Increase per Unit')
+kable(df, digits=2, align='ccccc', col.names=col_names, escape=F) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width=F)
+```
+
+ `r kfigr::figr(label = "price_effect", prefix = TRUE, link = TRUE, type="Figure")`: Effect of top four features on price.
+</center>
+
+This table indicates the average price increase per facility unit. For instance, an additional FastQuad lift would support an adult weekend ticket price increase of approximately \$10.35 $\pm$.        
+- An addition run would support a price increase of $0.50 per adult weekend ticket.              
+- An additional square foot of snow making would support and addition $0.13 to the price 
+
+
+
+
+
+
+
+## What is Big Mountain's Position   
+The following table provides a sense of Big Mountain's rank within its market on price as well as its key leading indicators. As indicated in `r kfigr::figr(label = "minima", prefix = TRUE, link = TRUE, type="Table")`, Big Mountain Ski Resort has the 51st highest price in the national market, but ranks 28th, 6th and 17th on the customer's top three most important features. This gives a clear indication that Big Mountain has some upward room to move on price.
+
+```{python ranks, echo=FALSE}
+ranks = get_ranks()
+```
+
+<center>
+ `r kfigr::figr(label = "minima", prefix = TRUE, link = TRUE, type="Table")`: Big Mountain Resort Rankings by Import Features
+</center>
+```{r}
+kable(py$ranks) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width=F)
+```
+
+## Returns on Investments
+Lastly, a linear regression was conducted on each of the most important features to understand the price effects
+
+
+## Appendix
+### Ticket Price
+
+```{python price_comparison, echo=FALSE}
+plot_compare('AdultWeekend', 'Adult weekend ticket price ($)')  
+plt.show()
+```
+<center>
+ `r kfigr::figr(label = "price", prefix = TRUE, link = TRUE, type="Figure")`: Big Mountain Resort Ranking by Adult Weekend Price
+</center>
+
+
+```{python price_montana, echo=FALSE}
+plot_compare('AdultWeekend', 'Adult weekend ticket price ($) - Montana only', state='Montana')
+plt.show()
+```
+<center>
+ `r kfigr::figr(label = "price_Montana", prefix = TRUE, link = TRUE, type="Figure")`: Big Mountain Resort Ranking by Adult Weekend Price within Montana
+</center>
+
+### Vertical Drop
+
+```{python vd, echo=FALSE}
+plot_compare('vertical_drop', 'Vertical drop (feet)')  
+plt.show()
+```
+<center>
+ `r kfigr::figr(label = "vd", prefix = TRUE, link = TRUE, type="Figure")`: Big Mountain Resort Ranking by Vertical Drop
+</center>
+
+### Snow Making
+
+```{python snow_making, echo=FALSE}
+plot_compare('Snow Making_ac', 'Area covered by snow makers (acres)')
+plt.show()
+```
+<center>
+ `r kfigr::figr(label = "snow_making", prefix = TRUE, link = TRUE, type="Figure")`: Big Mountain Resort Ranking by Snow Making
+</center>
+
+### Total Number of Chairs
+
+```{python chairs, echo=FALSE}
+plot_compare('total_chairs', 'Total number of chairs')
+plt.show()
+```
+<center>
+ `r kfigr::figr(label = "chairs", prefix = TRUE, link = TRUE, type="Figure")`: Big Mountain Resort Ranking by Total Number of Chairs
+</center>
+
+### Fast Quads
+
+```{python fastquads, echo=FALSE}
+plot_compare('fastQuads', 'Number of fast quads')
+plt.show()
+```
+<center>
+ `r kfigr::figr(label = "fastquads", prefix = TRUE, link = TRUE, type="Figure")`: Big Mountain Resort Ranking by Fast Quads
+</center>
+
+### Runs
+
+```{python runs, echo=FALSE}
+plot_compare('Runs', 'Total number of runs')
+plt.show()
+```
+<center>
+ `r kfigr::figr(label = "runs", prefix = TRUE, link = TRUE, type="Figure")`: Big Mountain Resort Ranking by Runs
+</center>
+
+### Trams
+
+```{python trams, echo=FALSE}
+plot_compare('trams', 'Number of trams')
+plt.show()
+```
+<center>
+ `r kfigr::figr(label = "trams", prefix = TRUE, link = TRUE, type="Figure")`: Big Mountain Resort Ranking by Trams
+</center>
+
+### Skiable Terrain Area
+
+```{python area, echo=FALSE}
+plot_compare('SkiableTerrain_ac', 'Skiable terrain area (acres)')
+plt.show()
+```
+<center>
+ `r kfigr::figr(label = "area", prefix = TRUE, link = TRUE, type="Figure")`: Big Mountain Resort Ranking Skiable Terrain Area
+</center>
