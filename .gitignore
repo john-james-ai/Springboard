@@ -1,3 +1,4 @@
 # Ignore word docs.
 *.docx
 .Rproj.user
+*.html

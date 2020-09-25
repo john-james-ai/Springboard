@@ -38,6 +38,9 @@ def get_model():
     return model
 
 
+print(ski_data.shape)
+
+
 def plot_compare(feat_name, description, state=None, figsize=(10, 5)):
     """Graphically compare distributions of features.
     

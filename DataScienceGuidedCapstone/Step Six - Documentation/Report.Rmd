@@ -1,10 +1,10 @@
 ---
-title: "Big Mountain Resort: Value Creation and Value Capture Strategy"
+title: "Big Mountain Resort"
 author: "John James john.james@nov8.ai"
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output: 
   html_document:
-    toc: true
+    toc: no
     toc_depth: 4
     toc_float: true
     theme: flatly
@@ -71,15 +71,31 @@ sys.path.append(home)
 ```
 ```{python module, include=FALSE, code=readLines('./Report.py')}
 ```
+# Optimizing Value Creation, Maximizing Value Capture in the Ski Resort Industry
+## Big Mountain Executive Summary
+We've examined the facilities (over 35 features) and pricing for over 300 ski resorts across 34 states. Multiple models were developed and the results were cross-validated. The following summarizes the key insights from the analysis and modeling processes, **based upon the data provided**:              
+
+- Big Mountain Ski Resort's current facilities, terrain and runs could support an adult weekend price of \$94.22 - an increase of 16% over the current price, corresponding to an annual revenue increase north of \$4.6M first-year on the current operations platform.     
+
+- Of the four scenarios under consideration, adding the additional run had the greatest revenue impact. This would support an addition \$1.99 per adult weekend ticket, or an additional \$700K in annual revenue.          
+
+- The facilities most important to customers are:        
+
+  - FastQuads           
+  - Runs        
+  - Snow Making           
+  - Vertical Drop       
+  
+Disclaimer: The above insights were based upon the data provided. Further analysis of operating costs would be required to evaluate return on investment of the scenarios under consideration.
 
 ## Big Mountain Current Situation         
 Big Mountain Ski Resort offers spectacular views of Glacier National Park and Flathead National Forest, access to 105 trails, a vertical drop of 2353 feet, and over 3000 square feet of skiable terrain to some 350,000 visitors per year.  
 
 The current asset base includes 2 T-bars, a magic carpet for novice skiers and 12 lifts, one of which was recently added to increase the distribution of visitors across the mountain resulting in a net annual operating cost increase of $1.54M.
 
-Big Mountain's is currently evaluating how it creates and captures value vis-a-vis its investment, pricing, and operational strategies. Currently, Big Mountain charges an adult price of $81 per weekend day. This current pricing regime is to charge a premium over the average price of resorts in their market segment, but that approach is problematic in several respects. First, it provides no insight into what constitutes value from the perspective of the customer. Second, it doesn't reflect how and to what degree the resort delivers the value, and finally, the strategy doesn't maximize value capture for the company. Consequently, investment and cost-cutting strategies cannot be considered on the basis of valuable market and customer data.
+Big Mountain's is currently evaluating value creation and capture vis-a-vis its investment, pricing, and operations strategies. Their current adult weekend day price of $81 is a premium over the average price of resorts in their market segment, but that approach is problematic in several respects. First, it provides no insight into what constitutes value from the perspective of the customer. Second, it doesn't reflect how and to what degree the resort delivers that value, and finally, the strategy doesn't maximize value capture for the company. Consequently, investment and cost-cutting strategies cannot be considered on the basis of valuable market and customer data.
 
-Big Mountain Ski Resort has engaged outside council to: 
+Big Mountain Ski Resort has engaged outside consultants to: 
 
 1. illuminate the aspects of Big Mountain's facilities that have the greatest (and least) influence on price.    
 2. propose a pricing strategy that maximizes revenue for the company and value for the customer, and           
@@ -93,21 +109,153 @@ The analysis should help address questions such as:
 
 This market and customer data will yield better investment and cost-cutting decisions, optimize value creation for the customer, and maximize value capture for Big Mountain! 
 
-## Recommendation to Big Mountain: Add the Run!
-### Price Recommendation
-The models trained on nearly 300 ski resorts across the country indicate that Big Mountain's current facilities could support a price of \$94.22 per adult, per weekend day - an increase of 16%, corresponding to an annual revenue increase north of \$4.6 million annually.
+## Project Methods: Analysis and Modeling          
+To ensure that any conclusions would be supported by data and statistical rigor, extensive exploratory data analysis, feature engineering, and modeling efforts were conducted.      
 
-### Scenario Recommendation
-Four scenarios are being considered by Big Mountain executives:
+### Exploratory Data Analysis            
+Demographic and aggregate ski resort data by state was obtained to augment the ski resort data provided by Big Mountain. 
 
-1. Permanently closing down up to 10 of the least used runs. This doesn't impact any other resort statistics.   
-2. Increase the vertical drop by adding a run to a point 150 feet lower down but requiring the installation of an additional chair lift to bring skiers back up, without additional snow making coverage            
-3. Same as number 2, but adding 2 acres of snow making cover             
-4. Increase the longest run by 0.2 mile to boast 3.5 miles length, requiring an additional snow making coverage of 4 acres.
+#### State Ski Resort Data
+The state ski resort data included the following for each of the 34 states within the scope of the analysis:    
 
-Of the four options being considered, adding the additional run and chair lift would support a ticket price increase of \$1.99. With 350,000 visitors per year, this would correspond with an approximate \$3,5 million revenue increase per year. Adding the additional 2 acres of snow making had no incremental effect on price and increasing the longest run by .2 miles had no absolute impact on price.
+- resorts per state              
+- state total skiable area             
+- state total days open             
+- state total terrain parks     
+- state total night skiing          
+- state population          
+- state area in square miles.
 
-Closing down up to 10 of the least used runs would have a non-trivial impact on price. 
+The following summarizes Montana's ranking for these features.
+
+
+<center>
+ `r kfigr::figr(label = "rank", prefix = TRUE, link = TRUE, type="Table")`: Montana's State Rank vis-a-vis Select State Resort Statistics
+ 
+|                   measure |      value | rank |
+|---------------------------|------------|------|
+|                state_area |  147,040.0 |  3.0 |
+|  state_total_skiable_area |   214,10.0 |  4.0 |
+|   state_total_nightskiing |      710.0 |  8.0 |
+| state_total_terrain_parks |       27.0 | 11.0 |
+|         resorts_per_state |       12.0 | 11.5 |
+|     state_total_days_open |      951.0 | 15.0 |
+|          state_population |1,068,778.0 | 30.0 |
+
+</center>
+
+
+Based upon this initial observation, two additional features were created to describe the degree of competitiveness or *resort density* among the resorts and states.  
+
+- resorts per 100K capita           
+- resorts per 100K square miles.
+
+Montana ranked 4th among the 34 states in terms of resorts per 100K people, but 24th in resorts per 100K square miles. This indicates that Montana may be one of the most competitive states for ski resort operators.  
+
+Next, the project considered the degree to which patterns in pricing at the state level were extant. The analysis revealed no discernible patterns in ticket price among the states; videlicet, knowing the state of a resort would reveal little about the adult weekend price for a resort. Consequently, all resorts would be included and state would not be a factor in the modeling process.
+
+As such, four additional features for each resort were created:         
+
+- Ratio of resort skiable area to state total skiable area,               
+- Ratio of days open last year to state total days open,              
+- Ratio of terrain parks to state total terrain parks, and           
+- Ratio of night skiing to total state night skiing         
+
+#### Ski Resort Data
+The ski resort data set was the focus of the second phase of the exploratory data analysis. 
+
+The following table provides a sense of Big Mountain's rank within its market on price as well as its key leading indicators of price. As indicated in `r kfigr::figr(label = "minima", prefix = TRUE, link = TRUE, type="Table")`, Big Mountain Ski Resort has the 51st highest price in the national market, but ranks 6th, 17th and 28th on snow making, total chairs, and vertical drop, respectively; three of the top four features most important to customer. This gives a clear indication that Big Mountain has some upward room to move on price.
+
+```{python ranks, echo=FALSE}
+ranks = get_ranks()
+```
+
+<center>
+ `r kfigr::figr(label = "minima", prefix = TRUE, link = TRUE, type="Table")`: Big Mountain Resort Rankings by Import Features
+
+```{r}
+kable(py$ranks) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width=F)
+```
+</center>
+
+To illuminate any relationships between the features and the adult weekend price, the team examined the distributions of each feature individually vis-a-vis ticket price. A correlation analysis revealed the following as highly correlated with ticket price:      
+
+<center>
+ `r kfigr::figr(label = "r", prefix = TRUE, link = TRUE, type="Table")`: Features most highly correlated with adult weekend ticket price.
+
+|           Feature | Correlation |
+|-------------------|-------------|
+|    Snow Making_ac |    0.695764 |
+|     LongestRun_mi |    0.579602 |
+|             trams |    0.569015 |
+| projectedDaysOpen |    0.529650 |
+| SkiableTerrain_ac |    0.527750 |
+
+</center>
+
+Additionally, inter-feature correlations were examined illuminating non-trivial multicollinearity among the features.  The most highly correlated features were:              
+
+<center>
+ `r kfigr::figr(label = "r_features", prefix = TRUE, link = TRUE, type="Table")`: Inter-feature correlations
+
+|                                 |                                    | Correlation |
+|---------------------------------|------------------------------------|-------------|
+|                       base_elev |                        summit_elev |    0.980324 |
+| resort_terrain_park_state_ratio |       resort_days_open_state_ratio |    0.878704 |
+|                daysOpenLastYear |                  projectedDaysOpen |    0.857811 |
+| resort_terrain_park_state_ratio | resort_skiable_area_ac_state_ratio |    0.844813 |
+|            fastQuads_runs_ratio |            fastQuads_skiable_ratio |    0.825181 |
+|                   vertical_drop |                               Runs |    0.811898 |
+|    resort_days_open_state_ratio | resort_skiable_area_ac_state_ratio |    0.770721 |
+|                            Runs |                  SkiableTerrain_ac |    0.763901 |
+|                    AdultWeekend |                               Runs |    0.756926 |
+|         total_chairs_runs_ratio |         total_chairs_skiable_ratio |    0.751181 |
+|            fastQuads_runs_ratio |                          fastQuads |    0.737534 |
+
+</center>
+
+A sizeable amount of multicollinearity was introduced by the state ratio features; hence, they contributed little to the analysis and were excused from service.
+
+
+### Modeling 
+The objective at this stage was to create a model that would predict an *expected* adult weekend ticket price for Big Mountain, given current facilities, terrain and operating platform. 
+
+Two models were created:     
+
+1. Linear Regression Model    
+2. Random Forest Model   
+
+The linear regression model is based upon the assumption that there exists a linear relationship between the features and the target, adult weekend ticket price.  The random forest model is based upon a series of prediction trees, or a forest, of predictions. The expected ticket price is the average of the predictions of the regression trees.
+
+The modeling process was codified in a pipeline including the following steps:     
+
+- Impute missing values with their means             
+- Scale the features to have zero mean and unit variance            
+- The best of the 10 features were selected    
+- Train the models on those features               
+- Compute model performance        
+
+The following summarizes the cross-validated performance of the two algorithms:    
+
+<center>
+ `r kfigr::figr(label = "performance", prefix = TRUE, link = TRUE, type="Table")`: Performance of Linear Regression and Random Forests Models
+</center>
+
+| Metric                            	| Linear Regression 	| Random Forests 	|
+|-----------------------------------	|-------------------	|----------------	|
+| Coefficient of Determination (R2) 	| 0.632887          	| 0.708161       	|
+
+The best model (Random Forests) was then used to predict the expected price based upon current facilities, terrain, and operating platform vis-a-vis those of over 300 other ski resorts across 34 states.
+
+## Recommendations for Big Mountain                  
+Based upon the data, analysis, and modeling above, the team recommends the following:    
+
+1. Big Mountain could sustain a 16% increase in adult weekend ticket price to \$94.22. This would constitute a before tax revenue increase north of \$4.6M first-year on the current operations platform.           
+
+2. Of the four scenarios being considered, the additional run and chair lift would support an additional ticket price increase of \$1.99 per adult weekend ticket, resulting in an additional $700K in annual revenue first year.
+
+Closing down up to 10 of the least used runs would have a non-trivial impact on price as indicated in `r kfigr::figr(label = "scenario_1", prefix = TRUE, link = TRUE, type="Figure")`.
 
 ```{python scenario_1, echo=FALSE, warnings=F, message=F}
 scenario_1_chart()
@@ -117,67 +265,15 @@ plt.show()
  `r kfigr::figr(label = "scenario_1", prefix = TRUE, link = TRUE, type="Figure")`: Big Mountain Resort Scenario #1 Price and Revenue Impact
 </center>
 
-## What Matters Most to Customers        
+## Next Steps
+There are two efforts recommended as next steps.   
 
-To assess the facilities that had the greatest influence on price, a feature correlation analysis and two machine learning models were developed. The four features having the greatest influence in price were:
+1. Obtain operational cost data and incorporate that into the model to assess ROI.              
+2. Create an interactive dashboard that takes in real time operational, competitive, and macro-economic data and produces investment and pricing scenarios and long term return on investment.    
 
-- fastQuads           
-- Runs      
-- Snow Making_ac           
-- vertical_drop    
+The above reflects the work and conclusions of the entire team.
 
-Other features with smaller but statistically significant impact on price include:     
-
-- total_chairs         
-- LongestRun_mi       
-- trams        
-- SkiableTerrain_ac          
-
-The following summarizes the results of simple linear regressions performed on the top four features.
-
-```{python price_effect, echo=FALSE, warnings=F, message=F}
-detail, summary = regression()
-```
-<center>
-```{r}
-df <- py$summary
-df$Revenue <- currency(df$Revenue)
-col_names <- c('Expected Adult Weekend Ticket<br/>Price Increase per Unit',
-               'Lower Range', 'Upper Range', 'Expected Annual Revenue <br/> Increase per Unit')
-kable(df, digits=2, align='ccccc', col.names=col_names, escape=F) %>%
-  kable_styling(bootstrap_options = c("striped", "hover"), full_width=F)
-```
-
- `r kfigr::figr(label = "price_effect", prefix = TRUE, link = TRUE, type="Figure")`: Effect of top four features on price.
-</center>
-
-This table indicates the average price increase per facility unit. For instance, an additional FastQuad lift would support an adult weekend ticket price increase of approximately \$10.35 $\pm$.        
-- An addition run would support a price increase of $0.50 per adult weekend ticket.              
-- An additional square foot of snow making would support and addition $0.13 to the price 
-
-
-
-
-
-
-
-## What is Big Mountain's Position   
-The following table provides a sense of Big Mountain's rank within its market on price as well as its key leading indicators. As indicated in `r kfigr::figr(label = "minima", prefix = TRUE, link = TRUE, type="Table")`, Big Mountain Ski Resort has the 51st highest price in the national market, but ranks 28th, 6th and 17th on the customer's top three most important features. This gives a clear indication that Big Mountain has some upward room to move on price.
-
-```{python ranks, echo=FALSE}
-ranks = get_ranks()
-```
-
-<center>
- `r kfigr::figr(label = "minima", prefix = TRUE, link = TRUE, type="Table")`: Big Mountain Resort Rankings by Import Features
-</center>
-```{r}
-kable(py$ranks) %>%
-  kable_styling(bootstrap_options = c("striped", "hover"), full_width=F)
-```
-
-## Returns on Investments
-Lastly, a linear regression was conducted on each of the most important features to understand the price effects
+The appendix provides additional supporting data and visualizations.
 
 
 ## Appendix
