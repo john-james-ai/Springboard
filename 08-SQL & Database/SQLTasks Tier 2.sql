@@ -54,12 +54,12 @@ exploring the data, and getting acquainted with the 3 tables. */
 /* Q1: Some of the facilities charge a fee to members, but some do not.
 Write a SQL query to produce a list of the names of the facilities that do. */
 
-SELECT DISTINCT name FROM Facilities WHERE membercost > 0
+SELECT DISTINCT name as Facility FROM Facilities WHERE membercost > 0
 
 
 /* Q2: How many facilities do not charge a fee to members? */
 
-SELECT COUNT(DISTINCT NAME) FROM Facilities WHERE membercost = 0
+SELECT COUNT(DISTINCT NAME) AS NoChargeFacilities FROM Facilities WHERE membercost = 0
 
 
 /* Q3: Write an SQL query to show a list of facilities that charge a fee to members,
@@ -87,10 +87,10 @@ SELECT * FROM Facilities WHERE facid IN (1,5)
 more than $100. Return the name and monthly maintenance of the facilities
 in question. */
 SELECT
-name,
+name as Facility,
 CASE WHEN monthlymaintenance <= 100 THEN "cheap"
-     ELSE "expensive" END AS cost,
-monthlymaintenance
+     ELSE "expensive" END as Cost,
+monthlymaintenance as MonthlyMaintenance
 FROM Facilities
 
 /* Q6: You'd like to get the first and last name of the last member(s)
@@ -104,14 +104,14 @@ FROM Members WHERE joindate =
 Include in your output the name of the court, and the name of the member
 formatted as a single column. Ensure no duplicate data, and order by
 the member name. */
-SELECT DISTINCT f.name, CONCAT_WS(' ',m.surname, m.firstname) AS memname
+SELECT DISTINCT f.name AS Court, CONCAT_WS(', ',m.surname, m.firstname) AS Member
 FROM Facilities f
 INNER JOIN Bookings b ON f.facid = b.facid
 INNER JOIN Members m ON m.memid = b.memid
 WHERE f.name LIKE "%Tennis Court%" AND
 f.facid = b.facid AND
 m.surname != 'GUEST'
-ORDER BY memname
+ORDER BY Member
 
 /* Q8: Produce a list of bookings on the day of 2012-09-14 which
 will cost the member (or guest) more than $30. Remember that guests have
