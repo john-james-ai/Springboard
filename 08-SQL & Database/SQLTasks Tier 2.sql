@@ -120,49 +120,54 @@ the guest user's ID is always 0. Include in your output the name of the
 facility, the name of the member formatted as a single column, and the cost.
 Order by descending cost, and do not use any subqueries. */
 
-SELECT 	f.name,
-		gb.starttime,
-		CONCAT_WS(' ',m.surname, m.firstname) as name,
-		gb.slots * f.guestcost AS cost
+SELECT 	f.name AS Facility,
+		CONCAT_WS(', ',m.surname, m.firstname) AS Name,
+		gb.slots * f.guestcost AS Cost
 FROM Bookings gb
 INNER JOIN Members m ON m.memid = gb.memid
 INNER JOIN Facilities f ON f.facid = gb.facid
 WHERE gb.slots * f.guestcost > 30 AND
-    gb.starttime >= '2012-09-14 00:00:00' AND
-    gb.starttime <= '2012-09-14 23:59:59' AND
+    gb.starttime LIKE '2012-09-14%'AND
     gb.memid = 0
-UNION
-SELECT 	f.name,
-		mb.starttime,
-		CONCAT_WS(' ',m.surname, m.firstname) as name,
-		mb.slots * f.membercost AS cost
+UNION ALL
+SELECT 	f.name AS Facility,
+		CONCAT_WS(' ',m.surname, m.firstname) AS Name,
+		mb.slots * f.membercost AS Cost
 FROM Bookings mb
 INNER JOIN Members m ON m.memid = mb.memid
 INNER JOIN Facilities f ON f.facid = mb.facid
 WHERE mb.slots * f.membercost > 30 AND
-    mb.starttime >= '2012-09-14 00:00:00' AND
-    mb.starttime <= '2012-09-14 23:59:59' AND
+    mb.starttime LIKE '2012-09-14%'AND
     mb.memid != 0
-ORDER BY cost DESC
+ORDER BY Cost DESC
+
 
 
 /* Q9: This time, produce the same result as in Q8, but using a subquery. */
 SELECT
-	rates.Facility,
-	rates.Name,
-	b.slots * rates.cost AS Cost
+	Facility,
+	Name,
+	Cost
 FROM
-	(SELECT m.memid, CONCAT_WS(', ',m.surname, m.firstname) AS Name,f.facid,f.name AS Facility, f.guestcost AS cost
+	(SELECT
+		rates.memid as memid,
+		rates.facid as facid,
+		rates.Facility AS Facility,
+		rates.Name AS Name,
+		b.slots * rates.cost AS Cost
+	FROM
+		(SELECT m.memid, CONCAT_WS(', ',m.surname, m.firstname) AS Name,f.facid,f.name AS Facility, f.guestcost AS cost
+			FROM Facilities AS f
+    		CROSS JOIN Members as m
+    		WHERE m.memid = 0
+		UNION
+		SELECT m.memid, CONCAT_WS(', ',m.surname, m.firstname) AS Name,f.facid,f.name AS Facility, f.membercost AS cost
 		FROM Facilities AS f
-    	CROSS JOIN Members as m
-    	WHERE m.memid = 0
-	UNION
-	SELECT m.memid, CONCAT_WS(', ',m.surname, m.firstname) AS Name,f.facid,f.name AS Facility, f.membercost AS cost
-		FROM Facilities AS f
-		CROSS JOIN Members as m
-    	WHERE m.memid != 0) AS rates
-LEFT JOIN Bookings b ON b.facid = rates.facid AND rates.memid = b.memid AND b.slots * rates.cost > 30
-WHERE b.starttime LIKE '2012-09-14%'
+			CROSS JOIN Members as m
+    		WHERE m.memid != 0) AS rates
+	INNER JOIN Bookings b ON rates.memid = b.memid AND rates.facid = b.facid
+	WHERE b.starttime LIKE '2012-09-14%') as bookings
+WHERE Cost > 30
 ORDER BY Cost DESC
 
 
