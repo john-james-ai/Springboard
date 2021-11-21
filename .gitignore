@@ -4,3 +4,6 @@
 *.html
 .env
 *.zip
+*.csv
+*.xml
+*.tab
